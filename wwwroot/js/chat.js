@@ -28,3 +28,30 @@ document.getElementById("sendButton").addEventListener("click", function (event)
     });
     event.preventDefault();
 });
+
+connection.on("NewMessage", function (user, message) {
+    const li = document.createElement("li");
+    li.textContent = `${user} says ${message}`;
+    document.getElementById("messagesList").appendChild(li);
+});
+
+connection.on("newMessageWithId", function (user, id, message) {
+    let existing = document.getElementById(id);
+    if (!existing) {
+        existing = document.createElement("li");
+        existing.id = id;
+        document.getElementById("messagesList").appendChild(existing);
+    }
+    existing.textContent = `${user} says ${message}`;
+});
+
+connection.on("newMessageWithId", function (user, id, message) {
+    let existing = document.getElementById(id);
+    if (!existing) {
+        existing = document.createElement("li");
+        existing.id = id;
+        document.getElementById("messagesList").appendChild(existing);
+    }
+    existing.textContent = `${user} says ${message}`;
+    existing.scrollIntoView({ behavior: "smooth", block: "end" });
+});

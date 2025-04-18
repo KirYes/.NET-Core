@@ -14,9 +14,11 @@ namespace WebApplication2
             builder.Services.AddDbContext<WebApplication2Context>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("WebApplication2Context") ?? throw new InvalidOperationException("Connection string 'WebApplication2Context' not found.")));
 
+         
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddSignalR();
+     builder.Services.AddAzureOpenAI(builder.Configuration).AddSingleton<History>();
 
             var app = builder.Build();
 
