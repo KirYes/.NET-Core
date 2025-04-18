@@ -13,7 +13,23 @@ connection.on("ReceiveMessage", function (user, message) {
     // should be aware of possible script injection concerns.
     li.textContent = `${user} says ${message}`;
 });
-
+connection.on("Message", function (user, message) {
+    var li = document.createElement("li");
+    document.getElementById("messagesList").appendChild(li);
+    // We can assign user-supplied strings to an element's textContent because it
+    // is not interpreted as markup. If you're assigning in any other way, you 
+    // should be aware of possible script injection concerns.
+    li.textContent = `GPT Answer: ${message}`;
+});
+connection.on("Question", function (user, message) {
+    var li = document.createElement("li");
+    document.getElementById("messagesList").appendChild(li);
+    // We can assign user-supplied strings to an element's textContent because it
+    // is not interpreted as markup. If you're assigning in any other way, you
+    // should be aware of possible script injection concerns.
+        li.textContent = ` ${user}'s question to GPT: ${message}`;
+    
+});
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
 }).catch(function (err) {
@@ -27,31 +43,4 @@ document.getElementById("sendButton").addEventListener("click", function (event)
         return console.error(err.toString());
     });
     event.preventDefault();
-});
-
-connection.on("NewMessage", function (user, message) {
-    const li = document.createElement("li");
-    li.textContent = `${user} says ${message}`;
-    document.getElementById("messagesList").appendChild(li);
-});
-
-connection.on("newMessageWithId", function (user, id, message) {
-    let existing = document.getElementById(id);
-    if (!existing) {
-        existing = document.createElement("li");
-        existing.id = id;
-        document.getElementById("messagesList").appendChild(existing);
-    }
-    existing.textContent = `${user} says ${message}`;
-});
-
-connection.on("newMessageWithId", function (user, id, message) {
-    let existing = document.getElementById(id);
-    if (!existing) {
-        existing = document.createElement("li");
-        existing.id = id;
-        document.getElementById("messagesList").appendChild(existing);
-    }
-    existing.textContent = `${user} says ${message}`;
-    existing.scrollIntoView({ behavior: "smooth", block: "end" });
 });

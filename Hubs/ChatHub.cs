@@ -1,57 +1,44 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
-using OpenAI;
-using System.Text;
+using OpenAI.Chat;
+using Azure.Core;
+using Azure.AI.OpenAI;
+using Azure;
+using System.ClientModel.Primitives;
 
 namespace WebApplication2.Hubs
 {
     public class ChatHub : Hub
     {
-        private readonly History _history;
-        private readonly OpenAIClient _openAI;
-        private readonly OpenAIOptions _options;
-
-        public ChatHub(History history, OpenAIClient openAI, IOptions<OpenAIOptions> options)
-        {
-            _history = history;
-            _openAI = openAI;
-            _options = options.Value;
-        }
-
+     
         public async Task SendMessage(string user, string message)
         {
+            var endpoint = new Uri("https://kyryl-m9ndonei-swedencentral.cognitiveservices.azure.com/");
+            var model = "gpt-4o";
+            var deploymentName = "gpt-4o";
+            var apiKey = "3PPWk2AfHud6U1r9wKzWapBqeu64mSenNyZ2qiHgqsbnLQq9O4sdJQQJ99BDACfhMk5XJ3w3AAAAACOGg6Y5";
+            AzureOpenAIClient azureClient = new(
+       endpoint,
+       new AzureKeyCredential(apiKey));
+            ChatClient chatClient = azureClient.GetChatClient(deploymentName);
+            var requestOptions = new ChatCompletionOptions()
+            {
+                MaxOutputTokenCount = 4096,
+                Temperature = 1.0f,
+                TopP = 1.0f
+            };
             if (message.StartsWith("@gpt"))
             {
-                var id = Guid.NewGuid().ToString();
-                var actualMessage = message.Substring(4).Trim();
-
-                var messagesWithHistory = _history.GetOrAddUserHistory(user, actualMessage);
-                await Clients.All.SendAsync("NewMessage", user, message);
-
-                var chatClient = _openAI.GetChatClient(_options.Model);
-                var totalCompletion = new StringBuilder();
-                var lastSentTokenLength = 0;
-
-                await foreach (var completion in chatClient.CompleteChatStreamingAsync(messagesWithHistory))
-                {
-                    foreach (var content in completion.ContentUpdate)
-                    {
-                        totalCompletion.Append(content);
-
-                        if (totalCompletion.Length - lastSentTokenLength > 20)
-                        {
-                            await Clients.All.SendAsync("newMessageWithId", "AI Assistant", id, totalCompletion.ToString());
-                            lastSentTokenLength = totalCompletion.Length;
-                        }
-                    }
-                }
-
-                _history.UpdateUserHistoryForAssistant(user, totalCompletion.ToString());
-                await Clients.All.SendAsync("newMessageWithId", "AI Assistant", id, totalCompletion.ToString());
+                await Clients.All.SendAsync("Question", user, message.Substring(4).Trim());
+                List<ChatMessage> messages = new List<ChatMessage>()
+{
+    new SystemChatMessage("You are a helpful assistant."),
+                    new UserChatMessage(message),
+};
+                var response = chatClient.CompleteChat(messages, requestOptions);
+                await Clients.All.SendAsync("Message", user, response.Value.Content[0].Text);
             }
             else
             {
-                _ = _history.GetOrAddUserHistory(user, message);
                 await Clients.All.SendAsync("ReceiveMessage", user, message);
             }
         }
