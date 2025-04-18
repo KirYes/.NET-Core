@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using WebApplication2.Data;
 using WebApplication2.Models;
+using WebApplication2.Hubs;
 
 namespace WebApplication2
 {
@@ -15,6 +16,7 @@ namespace WebApplication2
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -41,7 +43,7 @@ namespace WebApplication2
             app.MapStaticAssets();
             app.MapRazorPages()
                .WithStaticAssets();
-
+            app.MapHub<ChatHub>("/chathub");
             app.Run();
         }
     }
