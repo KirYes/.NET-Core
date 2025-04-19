@@ -18,7 +18,7 @@ namespace WebApplication2
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddSignalR();
-     builder.Services.AddAzureOpenAI(builder.Configuration).AddSingleton<History>();
+     builder.Services.AddAzureOpenAI(builder.Configuration);
 
             var app = builder.Build();
 

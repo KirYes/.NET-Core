@@ -5,31 +5,21 @@ var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 //Disable the send button until connection is established.
 document.getElementById("sendButton").disabled = true;
 
+function appendMessage(text){
+    var li = document.createElement("li");
+    document.getElementById("messagesList").appendChild(li);
+    li.textContent = text;
+}
 connection.on("ReceiveMessage", function (user, message) {
-    var li = document.createElement("li");
-    document.getElementById("messagesList").appendChild(li);
-    // We can assign user-supplied strings to an element's textContent because it
-    // is not interpreted as markup. If you're assigning in any other way, you 
-    // should be aware of possible script injection concerns.
-    li.textContent = `${user} says ${message}`;
+    appendMessage(`${user} says ${message}`);
 });
-connection.on("Message", function (user, message) {
-    var li = document.createElement("li");
-    document.getElementById("messagesList").appendChild(li);
-    // We can assign user-supplied strings to an element's textContent because it
-    // is not interpreted as markup. If you're assigning in any other way, you 
-    // should be aware of possible script injection concerns.
-    li.textContent = `GPT Answer: ${message}`;
+connection.on("Answer", function (user, message) {
+    appendMessage(`GPT Answer: ${message}`);
 });
 connection.on("Question", function (user, message) {
-    var li = document.createElement("li");
-    document.getElementById("messagesList").appendChild(li);
-    // We can assign user-supplied strings to an element's textContent because it
-    // is not interpreted as markup. If you're assigning in any other way, you
-    // should be aware of possible script injection concerns.
-        li.textContent = ` ${user}'s question to GPT: ${message}`;
-    
+    appendMessage(`${user}'s question to GPT: ${message}`);
 });
+
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
 }).catch(function (err) {

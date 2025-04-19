@@ -1,6 +1,8 @@
-﻿using Azure.AI.OpenAI;
+﻿using Azure;
+using Azure.AI.OpenAI;
 using Microsoft.Extensions.Options;
 using OpenAI;
+using OpenAI.Chat;
 using System.ClientModel;
 
 namespace WebApplication2
@@ -11,15 +13,18 @@ namespace WebApplication2
         {
             return services
                 .Configure<OpenAIOptions>(configuration.GetSection("OpenAI"))
-                .AddSingleton<OpenAIClient>(provider =>
+                .AddSingleton<ChatClient>(provider =>
                 {
                     var options = provider.GetRequiredService<IOptions<OpenAIOptions>>().Value;
 
                     ArgumentException.ThrowIfNullOrWhiteSpace(options.Endpoint);
                     ArgumentException.ThrowIfNullOrWhiteSpace(options.Key);
 
-                    return new AzureOpenAIClient(new Uri(options.Endpoint), new ApiKeyCredential(options.Key));
+                    AzureOpenAIClient azureClient = new AzureOpenAIClient(new Uri(options.Endpoint), new ApiKeyCredential(options.Key));
+                    return azureClient.GetChatClient(options.DeploymentName);
                 });
+
         }
     }
 }
+

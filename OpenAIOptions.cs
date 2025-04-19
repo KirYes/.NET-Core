@@ -15,5 +15,7 @@
         /// The model to use.
         /// </summary>
         public string? Model { get; set; }
+
+        public string? DeploymentName { get; set; }
     }
 }
